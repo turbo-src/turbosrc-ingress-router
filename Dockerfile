@@ -10,7 +10,7 @@ COPY package*.json ./
 
 # If you have production-specific dependencies, you can use --only=production
 # Also, using `npm ci` to install dependencies for more reliable and reproducible builds.
-RUN npm ci
+RUN npm install
 
 # Bundle app source
 COPY . .
