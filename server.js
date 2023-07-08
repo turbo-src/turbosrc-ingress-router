@@ -32,7 +32,8 @@ socket.on('graphqlRequest', async ({ requestId, query, variables }) => {
       .set('accept', 'json');
 
     // Forward the response back to outGoingRouter
-    socket.emit(`graphqlResponse:${requestId}`, res.body);
+    socket.emit('graphqlResponse', { requestId, body: res.body });
+
   } catch (error) {
     // Forward the error back to outGoingRouter
     socket.emit(`graphqlResponse:${requestId}`, { errors: [{ message: error.message }] });
