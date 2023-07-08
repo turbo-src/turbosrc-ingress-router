@@ -11,9 +11,22 @@ const outGoingRouterUri = 'http://turbosrc-egress-router:4006';
 const turbosrcServiceUri = 'http://turbosrc-service:4000/graphql';
 
 // Connect to the outGoingRouter (aka egress-router)
-const socket = socketIO(outGoingRouterUri, {
-  autoConnect: true
-});
+let socket = createSocketConnection(outGoingRouterUri);
+
+function createSocketConnection(uri) {
+  const socket = socketIO(uri, {
+    autoConnect: true,
+    reconnection: true,
+    reconnectionDelay: 1000, // wait 1 seconds before attempting to reconnect
+    reconnectionAttempts: Infinity
+  });
+
+  socket.on('connect', () => console.log('Connected to egress-router.'));
+  socket.on('disconnect', () => console.log('Disconnected from egress-router.'));
+  socket.on('reconnecting', (attemptNumber) => console.log(`Attempting to reconnect to egress-router. Attempt ${attemptNumber}`));
+
+  return socket;
+}
 
 // Start Express
 const app = express();
