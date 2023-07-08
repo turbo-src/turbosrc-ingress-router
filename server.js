@@ -21,7 +21,11 @@ function createSocketConnection(uri) {
     reconnectionAttempts: Infinity
   });
 
-  socket.on('connect', () => console.log('Connected to egress-router.'));
+  socket.on('connect', () => {
+    console.log('Connected to egress-router.');
+    socket.emit('test', 'Hello from ingress-router!');
+  });
+
   socket.on('disconnect', () => console.log('Disconnected from egress-router.'));
   socket.on('reconnecting', (attemptNumber) => console.log(`Attempting to reconnect to egress-router. Attempt ${attemptNumber}`));
 
