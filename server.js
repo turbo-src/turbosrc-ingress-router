@@ -13,7 +13,13 @@ const turbosrcServiceUri = 'http://turbosrc-service:4000/graphql';
 // Connect to the outGoingRouter (aka egress-router)
 let socket = createSocketConnection(outGoingRouterUri);
 
+function getTurboSrcID() {
+  return process.env.TURBOSRC_ID;
+}
+
 function createSocketConnection(uri) {
+  const turboSrcID = getTurboSrcID()
+
   const socket = socketIO(uri, {
     autoConnect: true,
     reconnection: true,
@@ -23,7 +29,9 @@ function createSocketConnection(uri) {
 
   socket.on('connect', () => {
     console.log('Connected to egress-router.');
-    socket.emit('test', 'Hello from ingress-router!');
+    // Instead of hello, send a
+    socket.emit('newConnection', turboSrcID);
+    //socket.emit('test', 'Hello from ingress-router!');
   });
 
   socket.on('disconnect', () => console.log('Disconnected from egress-router.'));
