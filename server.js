@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const http = require('http');
 
 // The URI for the outGoingRouter
+//const outGoingRouterUri = 'https://turbosrc-marialis.dev';
 const outGoingRouterUri = 'http://turbosrc-egress-router:4006';
 
 // The URI for the turbosrc-service
@@ -20,12 +21,30 @@ function getTurboSrcID() {
 function createSocketConnection(uri) {
   const turboSrcID = getTurboSrcID()
 
+  if (!turboSrcID) {
+    throw new Error('TURBOSRC_ID environment variable is not set.');
+  }
+
   const socket = socketIO(uri, {
     autoConnect: true,
     reconnection: true,
     reconnectionDelay: 1000, // wait 1 seconds before attempting to reconnect
     reconnectionAttempts: Infinity
   });
+
+  socket.on('connect_error', (error) => {
+    console.log(`Connection to egress-router failed. Error: ${error.message}`);
+  });
+
+  socket.on('error', (error) => {
+    console.log(`Socket.IO error: ${error.message}`);
+  });
+
+
+  socket.on('connect_timeout', () => {
+    console.log('Connection to egress-router timed out.');
+  });
+
 
   socket.on('connect', () => {
     console.log('Connected to egress-router.');
