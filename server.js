@@ -29,7 +29,9 @@ function createSocketConnection(uri) {
     autoConnect: true,
     reconnection: true,
     reconnectionDelay: 1000, // wait 1 seconds before attempting to reconnect
-    reconnectionAttempts: Infinity
+    reconnectionAttempts: Infinity,
+    rejectUnauthorized: false,
+
   });
 
   socket.on('connect_error', (error) => {
