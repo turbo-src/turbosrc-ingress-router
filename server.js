@@ -61,7 +61,8 @@ socket.on('graphqlRequest', async ({ requestId, query, variables }) => {
 
   } catch (error) {
     // Forward the error back to outGoingRouter
-    socket.emit(`graphqlResponse:${requestId}`, { errors: [{ message: error.message }] });
+    //socket.emit(`graphqlResponse:${requestId}`, { errors: [{ message: error.message }] });
+    socket.emit('graphqlResponse', { requestId, errors: [{ message: error.message }] });
   }
 });
 
