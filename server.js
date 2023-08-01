@@ -5,7 +5,9 @@ const bodyParser = require('body-parser');
 const http = require('http');
 
 // The URI for the outGoingRouter
-const outGoingRouterUri = 'https://turbosrc-marialis.dev';
+
+//const outGoingRouterUri = 'https://turbosrc-marialis.dev';
+const outGoingRouterUri = 'http://turbosrc-egress-router:4006';
 
 // The URI for the turbosrc-service
 const turbosrcServiceUri = 'http://turbosrc-service:4000/graphql';
