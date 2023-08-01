@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const http = require('http');
 
 // The URI for the outGoingRouter
-const outGoingRouterUri = 'http://turbosrc-egress-router:4006';
+const outGoingRouterUri = 'https://turbosrc-marialis.dev';
 
 // The URI for the turbosrc-service
 const turbosrcServiceUri = 'http://turbosrc-service:4000/graphql';
@@ -24,14 +24,23 @@ function createSocketConnection(uri) {
     autoConnect: true,
     reconnection: true,
     reconnectionDelay: 1000, // wait 1 seconds before attempting to reconnect
-    reconnectionAttempts: Infinity
+    reconnectionAttempts: Infinity,
+    transports: ['websocket', 'polling'], // Add this line
+    secure: uri.startsWith('https'), // Add this line
+    rejectUnauthorized: false, // Add this line
   });
 
   socket.on('connect', () => {
-    console.log('Connected to egress-router.');
-    // Instead of hello, send a
+    console.log(`Connected to egress-router on ${uri}.`);
     socket.emit('newConnection', turboSrcID);
-    //socket.emit('test', 'Hello from ingress-router!');
+  });
+
+  socket.on('error', (error) => {
+    console.error(`Error occurred with egress-router: ${error.message}`);
+  });
+
+  socket.on('connect_error', (error) => {
+    console.error(`Connection error occurred with egress-router: ${error.message}`);
   });
 
   socket.on('disconnect', () => console.log('Disconnected from egress-router.'));
@@ -61,7 +70,6 @@ socket.on('graphqlRequest', async ({ requestId, query, variables }) => {
 
   } catch (error) {
     // Forward the error back to outGoingRouter
-    //socket.emit(`graphqlResponse:${requestId}`, { errors: [{ message: error.message }] });
     socket.emit('graphqlResponse', { requestId, errors: [{ message: error.message }] });
   }
 });
