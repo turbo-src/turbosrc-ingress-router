@@ -6,8 +6,9 @@ const http = require('http');
 
 // The URI for the outGoingRouter
 
-//const outGoingRouterUri = 'https://turbosrc-marialis.dev';
-const outGoingRouterUri = 'http://turbosrc-egress-router:4006';
+//turbosrc-service tells ingress the outgoing.
+
+var outGoingRouterUri = getEgressRouterURL().replace('/graphql', '');
 
 // The URI for the turbosrc-service
 const turbosrcServiceUri = 'http://turbosrc-service:4000/graphql';
@@ -19,8 +20,13 @@ function getTurboSrcID() {
   return process.env.TURBOSRC_ID;
 }
 
+function getEgressRouterURL() {
+  return process.env.EGRESS_ROUTER_URL;
+}
+
 function createSocketConnection(uri) {
   const turboSrcID = getTurboSrcID()
+  const reponame = turboSrcID + "/" + turboSrcID
 
   const socket = socketIO(uri, {
     autoConnect: true,
@@ -34,7 +40,7 @@ function createSocketConnection(uri) {
 
   socket.on('connect', () => {
     console.log(`Connected to egress-router on ${uri}.`);
-    socket.emit('newConnection', turboSrcID);
+    socket.emit('newConnection', turboSrcID, reponame);
   });
 
   socket.on('error', (error) => {
