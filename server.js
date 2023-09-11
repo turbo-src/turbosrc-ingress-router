@@ -2,6 +2,7 @@ const express = require('express');
 const socketIO = require('socket.io-client');
 const superagent = require('superagent');
 const bodyParser = require('body-parser');
+const Wallet = require('ethereumjs-wallet');
 const http = require('http');
 
 // The URI for the outGoingRouter
@@ -16,8 +17,20 @@ const turbosrcServiceUri = 'http://turbosrc-service:4000/graphql';
 // Connect to the outGoingRouter (aka egress-router)
 let socket = createSocketConnection(outGoingRouterUri);
 
+function signNewConnectionMessage(contributor_signature, message) {
+  const wallet = Wallet.fromPrivateKey(Buffer.from(contributor_signature, 'hex'));
+  const messageHash = Buffer.from(message);
+  const signature = wallet.sign(messageHash);
+  const signatureString = signature.toString('hex');
+  return signatureString;
+}
+
 function getTurboSrcID() {
   return process.env.TURBOSRC_ID;
+}
+
+function getTurboSrcKey() {
+  return process.env.TURBOSRC_KEY;
 }
 
 function getEgressRouterURL() {
@@ -26,6 +39,7 @@ function getEgressRouterURL() {
 
 function createSocketConnection(uri) {
   const turboSrcID = getTurboSrcID()
+  const turboSrcKey = getTurboSrcKey()
   const reponame = turboSrcID + "/" + turboSrcID
 
   const socket = socketIO(uri, {
@@ -38,9 +52,12 @@ function createSocketConnection(uri) {
     rejectUnauthorized: false, // Add this line
   });
 
+
+
   socket.on('connect', () => {
     console.log(`Connected to egress-router on ${uri}.`);
-    socket.emit('newConnection', turboSrcID, reponame);
+    signedTurboSrcID = signNewConnectionMessage(turboSrcKey, turboSrcID);
+    socket.emit('newConnection', turboSrcID, signedTurboSrcID, reponame);
   });
 
   socket.on('error', (error) => {

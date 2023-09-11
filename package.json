@@ -10,6 +10,7 @@
       "express": "^4.17.1",
       "socket.io-client": "^4.3.2",
       "body-parser": "^1.19.0",
-      "superagent": "^6.1.0"
+      "superagent": "^6.1.0",
+      "ethereumjs-wallet": "^1.0.2"
     }
 }
