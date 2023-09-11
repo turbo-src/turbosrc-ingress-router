@@ -2,7 +2,8 @@ const express = require('express');
 const socketIO = require('socket.io-client');
 const superagent = require('superagent');
 const bodyParser = require('body-parser');
-const Wallet = require('ethereumjs-wallet');
+const ethereumjsWallet = require('ethereumjs-wallet');
+const ethUtil = require('ethereumjs-util');
 const http = require('http');
 
 // The URI for the outGoingRouter
@@ -18,10 +19,18 @@ const turbosrcServiceUri = 'http://turbosrc-service:4000/graphql';
 let socket = createSocketConnection(outGoingRouterUri);
 
 function signNewConnectionMessage(contributor_signature, message) {
-  const wallet = Wallet.fromPrivateKey(Buffer.from(contributor_signature, 'hex'));
-  const messageHash = Buffer.from(message);
-  const signature = wallet.sign(messageHash);
-  const signatureString = signature.toString('hex');
+  const privateKeyBuffer = Buffer.from(contributor_signature, 'hex');
+  const wallet = ethereumjsWallet.default.fromPrivateKey(privateKeyBuffer);
+
+  // Ensure the message is a Buffer before hashing
+  const messageBuffer = Buffer.isBuffer(message) ? message : Buffer.from(message.slice(2), 'hex'); // Assumes a 0x prefix for the input message
+
+  const messageHash = ethUtil.keccak256(messageBuffer);
+
+  // Using ecsign to get the signature
+  const { v, r, s } = ethUtil.ecsign(messageHash, privateKeyBuffer);
+  const signatureString = Buffer.concat([r, s, Buffer.from([v])]).toString('hex');
+
   return signatureString;
 }
 
