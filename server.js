@@ -19,9 +19,10 @@ const turbosrcServiceUri = 'http://turbosrc-service:4000/graphql';
 let socket = createSocketConnection(outGoingRouterUri);
 
 function signNewConnectionMessage(contributor_signature, message) {
-  const privateKeyBuffer = Buffer.from(contributor_signature, 'hex');
-  const wallet = ethereumjsWallet.default.fromPrivateKey(privateKeyBuffer);
+  console.log(`Contributor Signature Length (chars): ${contributor_signature.length}`);
+  console.log(`Contributor Signature: ${contributor_signature}`);
 
+  const privateKeyBuffer = Buffer.from(contributor_signature.slice(2), 'hex');
   // Ensure the message is a Buffer before hashing
   const messageBuffer = Buffer.isBuffer(message) ? message : Buffer.from(message.slice(2), 'hex'); // Assumes a 0x prefix for the input message
 
@@ -50,6 +51,16 @@ function createSocketConnection(uri) {
   const turboSrcID = getTurboSrcID()
   const turboSrcKey = getTurboSrcKey()
   const reponame = turboSrcID + "/" + turboSrcID
+  if (!turboSrcKey) {
+      console.error("TURBOSRC_KEY is not defined in the environment variables.");
+      return; // or throw an error
+  }
+
+  if (!turboSrcID) {
+      console.error("TURBOSRC_ID is not defined in the environment variables.");
+      return; // or throw an error
+  }
+
 
   const socket = socketIO(uri, {
     autoConnect: true,
