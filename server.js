@@ -76,7 +76,7 @@ function createSocketConnection(uri) {
 
   socket.on('connect', () => {
     console.log(`Connected to egress-router on ${uri}.`);
-    signedTurboSrcID = signNewConnectionMessage(turboSrcKey, turboSrcID);
+    let signedTurboSrcID = signNewConnectionMessage(turboSrcKey, turboSrcID);
     socket.emit('newConnection', turboSrcID, signedTurboSrcID, reponame);
   });
 
