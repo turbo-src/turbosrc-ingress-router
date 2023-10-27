@@ -74,10 +74,24 @@ function createSocketConnection(uri) {
 
 
 
+  function getCurrentVersion() {
+    return process.env.CURRENT_VERSION; // Assuming you have set this environment variable
+  }
+  
   socket.on('connect', () => {
     console.log(`Connected to egress-router on ${uri}.`);
-    signedTurboSrcID = signNewConnectionMessage(turboSrcKey, turboSrcID);
-    socket.emit('newConnection', turboSrcID, signedTurboSrcID, reponame);
+    const signedTurboSrcID = signNewConnectionMessage(turboSrcKey, turboSrcID);
+    
+    const currentVersion = getCurrentVersion();
+  
+    // Emitting the newConnection event with an additional parameter: currentVersion
+    socket.emit('newConnection', turboSrcID, signedTurboSrcID, reponame, currentVersion);
+  });
+
+  socket.on('versionMismatch', ({ message, suggestedVersion }) => {
+    console.error(message);
+    console.log(`Suggested version to pull from master: ${suggestedVersion}`);
+    // You can add more logic here, like logging the event or notifying the user, etc.
   });
 
   socket.on('error', (error) => {
